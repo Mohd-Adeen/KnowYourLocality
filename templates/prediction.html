@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Crime Prediction</h2>
+
+    <form method="POST" action="{{ url_for('predict') }}" class="form-inline mb-4">
+        <div class="form-group">
+            <label for="location" class="mr-2">Enter Location (State/District):</label>
+            <input type="text" class="form-control" id="location" name="location" placeholder="e.g. Mumbai" required>
+        </div>
+        <button type="submit" class="btn btn-primary ml-2">Search</button>
+    </form>
+
+    <!-- Display error message if location not found or prediction failed -->
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- Display prediction results -->
+    {% if prediction %}
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                Crime Predictions for {{ prediction.location }}
+            </div>
+            <div class="card-body">
+                <h5>Forecasted Years: {{ prediction.years | join(', ') }}</h5>
+                <ul>
+                    {% for crime, values in prediction.predictions.items() %}
+                        <li><strong>{{ crime }}:</strong> {{ values | join(', ') }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Display Crime Indicator -->
+    {% if crime_indicator %}
+        <div class="card mt-4">
+            <div class="card-header bg-warning text-white">
+                Crime Indicator for {{ prediction.location }}
+            </div>
+            <div class="card-body">
+                <h5>Crime Risk Level: {{ crime_indicator }}</h5>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Plotly chart -->
+    {% if chart_html %}
+        <div class="mt-4">
+            {{ chart_html | safe }}
+        </div>
+    {% endif %}
+
+    <!-- Back to Home -->
+    <div class="mt-4">
+        <a href="/" class="btn btn-secondary">Back to Home</a>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    document.getElementById('predictionForm').addEventListener('submit', function (e) {
+        e.preventDefault();  // Prevent form submission from reloading the page
+
+        const location = document.getElementById('location').value.trim();
+        if (!location) {
+            alert("Please enter a location.");
+            return;
+        }
+
+        const formBody = `location=${encodeURIComponent(location)}`;
+
+        fetch('/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formBody
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Display prediction results
+            const predictionContainer = document.getElementById('predictionResults');
+            predictionContainer.innerHTML = '';
+
+            const location = data.location;
+            const years = data.years;
+            const predictions = data.predictions;
+
+            let resultHtml = `<h5>Forecasted Years: ${years.join(', ')}</h5><ul>`;
+            for (const [crime, values] of Object.entries(predictions)) {
+                resultHtml += `<li><strong>${crime}:</strong> ${values.join(', ')}</li>`;
+            }
+            resultHtml += `</ul>`;
+
+            predictionContainer.innerHTML = resultHtml;
+
+            // Display chart
+            const chartContainer = document.getElementById('chartContainer');
+            chartContainer.innerHTML = data.chart_html;
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            alert('An error occurred while fetching prediction.');
+        });
+    });
+</script>
+{% endblock %}

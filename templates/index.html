@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!-- Hero Section with Search -->
+    <section class="hero-section" style="background-image: url('{{ url_for('static', filename='images/background.jpeg') }}')">
+        <div class="hero-overlay"></div>
+        <div class="container h-100">
+            <div class="row h-100 align-items-center">
+                <div class="col-12 text-center">
+                    <h1 class="display-4 text-white mb-4">A Software for Analysis of Crime in India</h1>
+                    <!--<form action="{{ url_for('search') }}" method="POST" class="search-form">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control form-control-lg" id="searchInput" 
+                                   name="query" placeholder="Search State or District" autocomplete="off">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                    </form>-->
+                    <form action="{{ url_for('search') }}" method="POST" class="search-form" id="searchForm">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control form-control-lg" 
+                                   name="location" 
+                                   id="searchInput" 
+                                   placeholder="Enter State or District name" 
+                                   autocomplete="off"
+                                   required
+                                   aria-label="Search location">
+                            <button class="btn btn-primary" type="submit">Analyze</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prediction Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="mb-4">Crime Prediction</h2>
+                    <p>Our advanced algorithms analyze historical crime data to predict future crime trends in different regions of India. This helps law enforcement agencies and citizens to be better prepared.</p>
+                    <a href="{{ url_for('predict') }}" class="btn btn-primary mt-3">Prediction</a>
+                </div>
+                <div class="col-lg-6">
+                    <img src="{{ url_for('static', filename='images/prediction.jpg') }}" alt="Crime Prediction" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="mb-4">About Us</h2>
+                    <p>We are a team of final-year Computer Engineering students passionate about using technology to address real-world issues. As part of our academic project, we are developing a website focused on analyzing and understanding crime patterns across India. Our platform combines data analytics, machine learning, and visualization tools to provide users with valuable insights into crime trends, hotspots, and safety patterns. By making crime data more accessible and understandable, we aim to empower citizens, law enforcement, and policymakers to make informed decisions and take proactive steps towards a safer India. Through innovation and collaboration, we strive to contribute to a safer, more secure society.</p>
+                </div>
+                <div class="col-lg-6">
+                    <img src="{{ url_for('static', filename='images/about.jpg') }}" alt="About Us" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Meet Our Team</h2>
+            <div class="row">
+                <div class="col-md-3 text-center mb-4">
+                    <img src="{{ url_for('static', filename='images/team/team1.jpeg') }}" class="img-fluid rounded-circle mb-3" alt="Team Member" width="150">
+                    <h4>Mohd. Adeen Ansari</h4>
+                    <p class="text-muted">Software Developer and Data Scientist</p>
+                </div>
+                <div class="col-md-3 text-center mb-4">
+                    <img src="{{ url_for('static', filename='images/team/team2.jpeg') }}" class="img-fluid rounded-circle mb-3" alt="Team Member" width="150">
+                    <h4>Kabir Selot</h4>
+                    <p class="text-muted">Web Developer</p>
+                </div>
+                <div class="col-md-3 text-center mb-4">
+                    <img src="{{ url_for('static', filename='images/team/team3.jpeg') }}" class="img-fluid rounded-circle mb-3" alt="Team Member" width="150">
+                    <h4>Aamir Bhattaria</h4>
+                    <p class="text-muted">Web Designer</p>
+                </div>
+                <div class="col-md-3 text-center mb-4">
+                    <img src="{{ url_for('static', filename='images/team/team4.jpeg') }}" class="img-fluid rounded-circle mb-3" alt="Team Member" width="150">
+                    <h4>Pranali Thorat</h4>
+                    <p class="text-muted">Admin</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Carousel -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Real-Time Crime News in India</h2>
+            <div class="news-carousel">
+                <div class="news-track">
+                    <div class="news-item">
+                        <h5>Cyber Crime Cases Rise by 30% in 2023</h5>
+                        <p>Latest reports show a significant increase in online fraud cases across major cities.</p>
+                    </div>
+                    <div class="news-item">
+                        <h5>New Police Initiative Reduces Street Crime</h5>
+                        <p>Community policing program shows promising results in Delhi neighborhoods.</p>
+                    </div>
+                    <div class="news-item">
+                        <h5>Supreme Court Ruling on Digital Privacy</h5>
+                        <p>Landmark judgment strengthens protections against unauthorized data collection.</p>
+                    </div>
+                    <div class="news-item">
+                        <h5>Women's Safety App Launched Nationwide</h5>
+                        <p>Government introduces new emergency response system for women in distress.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Contact Us</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <form action="{{ url_for('contact') }}" method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <input type="text" class="form-control" name="name" placeholder="Your Name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <input type="email" class="form-control" name="email" placeholder="Your Email" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" name="phone" placeholder="Phone Number">
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" name="message" rows="5" placeholder="Your Message" required></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/carousel.js') }}"></script>
+{% endblock %}
