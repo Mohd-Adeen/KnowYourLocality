@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <!-- Header Hero -->
+    <div class="text-center py-4 mb-4 border-bottom">
+        <h1 class="display-5 fw-bold text-dark">About <span class="text-primary">KnowYourLocality</span></h1>
+        <p class="lead text-muted mx-auto" style="max-width: 750px;">
+            A civic intelligence platform transforming open government statistics into transparent, population-normalized safety insights for citizens, travelers, and policymakers.
+        </p>
+        <span class="badge bg-light text-secondary border px-3 py-2">
+            <i class="fas fa-university me-1 text-primary"></i> Data Powered by NCRB & Census of India
+        </span>
+    </div>
+
+    <!-- Mission & Approach Section -->
+    <div class="row g-4 mb-5 align-items-center">
+        <div class="col-lg-6">
+            <h3 class="fw-bold mb-3">Our Mission & Approach</h3>
+            <p class="text-secondary leading-relaxed">
+                Raw crime figures can be misleading. A metropolis of 10 million people will naturally report higher aggregate crime numbers than a rural district of 50,000, yet its per-person risk may actually be significantly lower.
+            </p>
+            <p class="text-secondary leading-relaxed">
+                <strong>KnowYourLocality</strong> eliminates this bias by cross-referencing official annual incident records from the <strong>National Crime Records Bureau (NCRB)</strong> with <strong>Census of India population benchmarks</strong> to deliver statistically sound, per-capita crime rates (per 100,000 citizens) and a transparent <strong>0–100 Safety Score</strong>.
+            </p>
+            <div class="row g-3 mt-2">
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded shadow-sm border-start border-primary border-4">
+                        <h6 class="fw-bold text-primary mb-1">Per-Capita Accurate</h6>
+                        <small class="text-muted">Crimes normalized per 100,000 residents based on official census data.</small>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded shadow-sm border-start border-success border-4">
+                        <h6 class="fw-bold text-success mb-1">Time-Series Forecasts</h6>
+                        <small class="text-muted">Statistical ARIMA models projecting 3-year trend trajectories.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 bg-light p-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-database text-primary me-2"></i> Official Data Provenance</h5>
+                <ul class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent px-0 py-2">
+                        <strong>Source Authority:</strong> National Crime Records Bureau (NCRB), Ministry of Home Affairs, Government of India.
+                    </li>
+                    <li class="list-group-item bg-transparent px-0 py-2">
+                        <strong>Data Platform:</strong> Open Government Data (OGD) Platform India (<a href="https://data.gov.in" target="_blank" rel="noopener">data.gov.in</a>).
+                    </li>
+                    <li class="list-group-item bg-transparent px-0 py-2">
+                        <strong>Population Benchmark:</strong> Office of the Registrar General & Census Commissioner, India (2011 Census).
+                    </li>
+                    <li class="list-group-item bg-transparent px-0 py-2">
+                        <strong>License:</strong> Open Government Data License - India (OGDL).
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Methodology Overview -->
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-header bg-white py-3">
+            <h4 class="mb-0 fw-bold"><i class="fas fa-cogs text-primary me-2"></i> How the Safety Score is Calculated</h4>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4 text-center">
+                <div class="col-md-3">
+                    <div class="p-3 rounded bg-light">
+                        <i class="fas fa-filter text-info fs-1 mb-2"></i>
+                        <h6 class="fw-bold">1. Data De-duplication</h6>
+                        <small class="text-muted">Summary rows and administrative totals are excluded to prevent double-counting.</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 rounded bg-light">
+                        <i class="fas fa-users text-primary fs-1 mb-2"></i>
+                        <h6 class="fw-bold">2. Census Normalization</h6>
+                        <small class="text-muted">Crimes are adjusted against local population to derive annual rate per 100k.</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 rounded bg-light">
+                        <i class="fas fa-tachometer-alt text-warning fs-1 mb-2"></i>
+                        <h6 class="fw-bold">3. Domain Scoring</h6>
+                        <small class="text-muted">Sub-scores computed for Violent, Women's Safety, Property, and Financial offenses.</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 rounded bg-light">
+                        <i class="fas fa-chart-line text-success fs-1 mb-2"></i>
+                        <h6 class="fw-bold">4. Predictive Trend</h6>
+                        <small class="text-muted">Auto-Regressive Integrated Moving Average (ARIMA) models forecast trajectory.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="mb-5">
+        <h3 class="fw-bold text-center mb-4">Engineering Team</h3>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-3 col-sm-6 text-center">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <img src="{{ url_for('static', filename='images/team/team1.jpeg') }}" class="img-fluid rounded-circle mx-auto mb-3" alt="Mohd. Adeen Ansari" style="width: 120px; height: 120px; object-fit: cover;">
+                    <h5 class="fw-bold mb-1">Mohd. Adeen Ansari</h5>
+                    <p class="text-muted small mb-0">Software Developer & Data Scientist</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 text-center">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <img src="{{ url_for('static', filename='images/team/team2.jpeg') }}" class="img-fluid rounded-circle mx-auto mb-3" alt="Kabir Selot" style="width: 120px; height: 120px; object-fit: cover;">
+                    <h5 class="fw-bold mb-1">Kabir Selot</h5>
+                    <p class="text-muted small mb-0">Web Developer</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 text-center">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <img src="{{ url_for('static', filename='images/team/team3.jpeg') }}" class="img-fluid rounded-circle mx-auto mb-3" alt="Aamir Bhattaria" style="width: 120px; height: 120px; object-fit: cover;">
+                    <h5 class="fw-bold mb-1">Aamir Bhattaria</h5>
+                    <p class="text-muted small mb-0">Web Designer</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 text-center">
+                <div class="card h-100 shadow-sm border-0 p-3">
+                    <img src="{{ url_for('static', filename='images/team/team4.jpeg') }}" class="img-fluid rounded-circle mx-auto mb-3" alt="Pranali Thorat" style="width: 120px; height: 120px; object-fit: cover;">
+                    <h5 class="fw-bold mb-1">Pranali Thorat</h5>
+                    <p class="text-muted small mb-0">Admin & Operations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

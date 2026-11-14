@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <!-- Header -->
+    <div class="text-center py-4 mb-4 border-bottom">
+        <h1 class="display-6 fw-bold">Locality <span class="text-primary">Comparison Engine</span></h1>
+        <p class="lead text-muted mx-auto" style="max-width: 680px;">
+            Compare personal safety scores, per-capita crime rates, and domain vulnerabilities side-by-side between any two cities, districts, or states in India.
+        </p>
+    </div>
+
+    <!-- Comparison Search Bar -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <form method="POST" action="{{ url_for('compare') }}">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-5">
+                        <label for="loc1Input" class="form-label small fw-bold text-muted">First Locality</label>
+                        <input type="text" class="form-control form-control-lg" id="loc1Input" name="loc1" 
+                               placeholder="e.g. Mumbai, Maharashtra" value="{{ loc1 }}" autocomplete="off" required list="compareOptions">
+                    </div>
+                    <div class="col-md-2 text-center d-none d-md-block">
+                        <span class="badge bg-secondary rounded-pill px-3 py-2 mt-4">VS</span>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="loc2Input" class="form-label small fw-bold text-muted">Second Locality</label>
+                        <input type="text" class="form-control form-control-lg" id="loc2Input" name="loc2" 
+                               placeholder="e.g. Pune, Bangalore" value="{{ loc2 }}" autocomplete="off" required list="compareOptions">
+                    </div>
+                    <div class="col-12 text-center mt-3">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="fas fa-balance-scale me-1"></i> Compare Localities
+                        </button>
+                    </div>
+                </div>
+                <datalist id="compareOptions"></datalist>
+            </form>
+
+            <!-- Quick Presets -->
+            <div class="text-center mt-3 pt-2 border-top">
+                <small class="text-muted me-2">Quick Comparisons:</small>
+                <a href="{{ url_for('compare', loc1='Mumbai', loc2='Pune') }}" class="badge bg-light text-dark text-decoration-none border me-1">Mumbai vs Pune</a>
+                <a href="{{ url_for('compare', loc1='Delhi UT', loc2='Bangalore') }}" class="badge bg-light text-dark text-decoration-none border me-1">Delhi vs Bangalore</a>
+                <a href="{{ url_for('compare', loc1='Jaipur', loc2='Lucknow') }}" class="badge bg-light text-dark text-decoration-none border me-1">Jaipur vs Lucknow</a>
+                <a href="{{ url_for('compare', loc1='Maharashtra', loc2='Uttar Pradesh') }}" class="badge bg-light text-dark text-decoration-none border">Maharashtra vs Uttar Pradesh</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Banner -->
+    {% if error %}
+        <div class="alert alert-danger shadow-sm border-0 d-flex align-items-center mb-4">
+            <i class="fas fa-exclamation-circle fs-4 me-3"></i>
+            <div>{{ error }}</div>
+        </div>
+    {% endif %}
+
+    <!-- Comparison Results -->
+    {% if comparison %}
+        {% set a1 = comparison.loc1 %}
+        {% set a2 = comparison.loc2 %}
+
+        <!-- Side-by-Side KPI Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Locality 1 Card -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0 border-top border-primary border-4 p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-light text-secondary border mb-1">{{ a1.type|title }} Level</span>
+                            <h2 class="h3 fw-bold text-dark mb-0">{{ a1.location }}</h2>
+                            <small class="text-muted">{{ a1.state_name }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="display-6 fw-bold text-primary">{{ a1.safety_score }}<small class="fs-6 text-muted">/100</small></div>
+                            <small class="badge" style="background-color: {{ a1.risk_color }}; color: white;">{{ a1.risk_level }}</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row g-2 text-center">
+                        <div class="col-6">
+                            <span class="text-muted small text-uppercase d-block">Population (2011)</span>
+                            <strong class="fs-6">{{ "{:,}".format(a1.population) }}</strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small text-uppercase d-block">Crime Rate (per 100k)</span>
+                            <strong class="fs-6 text-primary">{{ a1.crime_rate_per_100k }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Locality 2 Card -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0 border-top border-danger border-4 p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-light text-secondary border mb-1">{{ a2.type|title }} Level</span>
+                            <h2 class="h3 fw-bold text-dark mb-0">{{ a2.location }}</h2>
+                            <small class="text-muted">{{ a2.state_name }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="display-6 fw-bold text-danger">{{ a2.safety_score }}<small class="fs-6 text-muted">/100</small></div>
+                            <small class="badge" style="background-color: {{ a2.risk_color }}; color: white;">{{ a2.risk_level }}</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row g-2 text-center">
+                        <div class="col-6">
+                            <span class="text-muted small text-uppercase d-block">Population (2011)</span>
+                            <strong class="fs-6">{{ "{:,}".format(a2.population) }}</strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small text-uppercase d-block">Crime Rate (per 100k)</span>
+                            <strong class="fs-6 text-danger">{{ a2.crime_rate_per_100k }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparative Summary Banner -->
+        <div class="alert alert-light border shadow-sm p-4 mb-4">
+            <h5 class="fw-bold mb-2"><i class="fas fa-lightbulb text-warning me-2"></i> Comparative Takeaway</h5>
+            <p class="mb-0 text-secondary">
+                {% if comparison.score_diff > 0 %}
+                    <strong>{{ a1.location }}</strong> has a higher Safety Score (+{{ comparison.score_diff }} points) with a lower incident rate than <strong>{{ a2.location }}</strong> ({{ a1.crime_rate_per_100k }} vs {{ a2.crime_rate_per_100k }} per 100k residents).
+                {% elif comparison.score_diff < 0 %}
+                    <strong>{{ a2.location }}</strong> has a higher Safety Score (+{{ comparison.score_diff|abs }} points) with a lower incident rate than <strong>{{ a1.location }}</strong> ({{ a2.crime_rate_per_100k }} vs {{ a1.crime_rate_per_100k }} per 100k residents).
+                {% else %}
+                    Both <strong>{{ a1.location }}</strong> and <strong>{{ a2.location }}</strong> demonstrate comparable safety metrics and per-capita risk levels.
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Domain Scores Comparison Table -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0"><i class="fas fa-tasks text-primary me-2"></i> Safety Sub-Index Comparison (0–100 Scale)</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Safety Domain</th>
+                                <th class="text-center" style="width: 30%;">{{ a1.location }} Score</th>
+                                <th class="text-center" style="width: 30%;">{{ a2.location }} Score</th>
+                                <th class="text-center">Advantage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for domain in a1.domain_scores.keys() %}
+                                {% set s1 = a1.domain_scores[domain] %}
+                                {% set s2 = a2.domain_scores.get(domain, 50) %}
+                                <tr>
+                                    <td class="fw-bold">{{ domain }}</td>
+                                    <td class="text-center">
+                                        <div class="progress" style="height: 18px;">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ s1 }}%;" aria-valuenow="{{ s1 }}" aria-valuemin="0" aria-valuemax="100">{{ s1 }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="progress" style="height: 18px;">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ s2 }}%;" aria-valuenow="{{ s2 }}" aria-valuemin="0" aria-valuemax="100">{{ s2 }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        {% if s1 > s2 %}
+                                            <span class="badge bg-primary text-white"><i class="fas fa-check me-1"></i> {{ a1.location }} (+{{ s1 - s2 }})</span>
+                                        {% elif s2 > s1 %}
+                                            <span class="badge bg-danger text-white"><i class="fas fa-check me-1"></i> {{ a2.location }} (+{{ s2 - s1 }})</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Equal</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trajectory Comparison Chart -->
+        <div class="card shadow-sm border-0 mb-5">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0"><i class="fas fa-chart-line text-primary me-2"></i> Multi-Year Trajectory Overlay</h5>
+            </div>
+            <div class="card-body p-3">
+                <div id="compare-chart" style="height: 480px; width: 100%;"></div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup Autocomplete for comparison inputs
+        ['loc1Input', 'loc2Input'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', function() {
+                    const q = this.value.trim();
+                    if (q.length < 2) return;
+                    fetch(`/autocomplete?q=${encodeURIComponent(q)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            let datalist = document.getElementById('compareOptions');
+                            if (!datalist) {
+                                datalist = document.createElement('datalist');
+                                datalist.id = 'compareOptions';
+                                document.body.appendChild(datalist);
+                            }
+                            datalist.innerHTML = '';
+                            data.forEach(item => {
+                                const option = document.createElement('option');
+                                option.value = item;
+                                datalist.appendChild(option);
+                            });
+                        })
+                        .catch(err => console.error(err));
+                });
+            }
+        });
+
+        // Render Comparison Chart if data present
+        {% if comparison and comparison.comparison_chart_json %}
+            const chartData = {{ comparison.comparison_chart_json|safe }};
+            const chartDiv = document.getElementById('compare-chart');
+            if (chartDiv && chartData) {
+                Plotly.newPlot(chartDiv, chartData.data, chartData.layout, { responsive: true, displayModeBar: false });
+                window.addEventListener('resize', function() {
+                    Plotly.Plots.resize(chartDiv);
+                });
+            }
+        {% endif %}
+    });
+</script>
+{% endblock %}

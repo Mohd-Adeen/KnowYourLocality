@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <!-- Header -->
+    <div class="text-center py-4 mb-4 border-bottom">
+        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold text-uppercase px-3 py-2 mb-2">
+            <i class="fas fa-trophy me-1"></i> Civic Safety Benchmark
+        </span>
+        <h1 class="display-6 fw-bold">District <span class="text-primary">Crime Rankings</span> &amp; Hotspots</h1>
+        <p class="lead text-muted mx-auto" style="max-width: 720px;">
+            Population-normalized safety evaluations and vulnerability indexes across India's administrative districts, calculated using official NCRB records and Census 2011 benchmarks.
+        </p>
+    </div>
+
+    <!-- Filter Control Card -->
+    <div class="card shadow-sm border-0 mb-4 bg-white">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ url_for('rankings') }}" id="rankingsFilterForm">
+                <div class="row g-3 align-items-end">
+                    <!-- State Filter -->
+                    <div class="col-lg-4 col-md-6">
+                        <label for="stateFilter" class="form-label small fw-bold text-muted text-uppercase">
+                            <i class="fas fa-map-marker-alt text-primary me-1"></i> Select State / UT
+                        </label>
+                        <select name="state" id="stateFilter" class="form-select" onchange="this.form.submit()">
+                            <option value="" {% if not rankings.current_state or rankings.current_state == 'All India' %}selected{% endif %}>
+                                🇮🇳 All India (All States &amp; UTs)
+                            </option>
+                            {% for st in rankings.states_available %}
+                                <option value="{{ st }}" {% if rankings.current_state == st %}selected{% endif %}>
+                                    {{ st }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Domain / Crime Category Filter -->
+                    <div class="col-lg-3 col-md-6">
+                        <label for="domainFilter" class="form-label small fw-bold text-muted text-uppercase">
+                            <i class="fas fa-shield-alt text-primary me-1"></i> Safety Domain
+                        </label>
+                        <select name="domain" id="domainFilter" class="form-select" onchange="this.form.submit()">
+                            <option value="" {% if not rankings.current_domain or rankings.current_domain == 'All IPC Crimes' %}selected{% endif %}>
+                                Overall (All IPC Crimes)
+                            </option>
+                            {% for d in rankings.domains_available %}
+                                <option value="{{ d }}" {% if rankings.current_domain == d %}selected{% endif %}>
+                                    {{ d }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Sort Mode: Safest vs Watchlist -->
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label small fw-bold text-muted text-uppercase">
+                            <i class="fas fa-sort-amount-down text-primary me-1"></i> Ranking Order
+                        </label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="sort" id="sortSafest" value="safest" autocomplete="off" 
+                                   {% if rankings.current_sort == 'safest' %}checked{% endif %} onchange="this.form.submit()">
+                            <label class="btn btn-outline-success" for="sortSafest">
+                                <i class="fas fa-shield-alt me-1"></i> Safest
+                            </label>
+
+                            <input type="radio" class="btn-check" name="sort" id="sortVulnerable" value="vulnerable" autocomplete="off" 
+                                   {% if rankings.current_sort == 'vulnerable' %}checked{% endif %} onchange="this.form.submit()">
+                            <label class="btn btn-outline-danger" for="sortVulnerable">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Watchlist
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Reset Filters Button -->
+                    <div class="col-lg-2 col-md-6 d-grid">
+                        <a href="{{ url_for('rankings') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-sync-alt me-1"></i> Reset Filters
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 border-start border-primary border-4 h-100 p-3">
+                <div class="text-muted small text-uppercase fw-bold">Current Scope</div>
+                <div class="h4 fw-bold text-dark mb-0">{{ rankings.current_state }}</div>
+                <small class="text-muted">{{ rankings.total_districts }} Administrative Districts Evaluated</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 border-start border-info border-4 h-100 p-3">
+                <div class="text-muted small text-uppercase fw-bold">Analyzed Domain</div>
+                <div class="h4 fw-bold text-info mb-0">{{ rankings.current_domain }}</div>
+                <small class="text-muted">Normalized per 100,000 citizens</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 border-start {% if rankings.current_sort == 'safest' %}border-success{% else %}border-danger{% endif %} border-4 h-100 p-3">
+                <div class="text-muted small text-uppercase fw-bold">
+                    {% if rankings.current_sort == 'safest' %}#1 Safest Rank{% else %}#1 High-Watchlist Rank{% endif %}
+                </div>
+                <div class="h4 fw-bold {% if rankings.current_sort == 'safest' %}text-success{% else %}text-danger{% endif %} mb-0">
+                    {{ rankings.districts[0].district if rankings.districts else 'N/A' }}
+                </div>
+                <small class="text-muted">
+                    {% if rankings.districts %}
+                        {{ rankings.districts[0].crime_rate_per_100k }} crimes / 100k (Score: {{ rankings.districts[0].safety_score }}/100)
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rankings Table Card -->
+    <div class="card shadow-sm border-0 mb-5 bg-white">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="fw-bold mb-0">
+                    <i class="fas fa-list-ol text-primary me-2"></i> Ranked District Directory
+                </h5>
+                <span class="badge bg-light text-dark border">Top {{ rankings.districts|length }} Results</span>
+            </div>
+            <div>
+                <input type="text" id="tableQuickSearch" class="form-control form-control-sm" placeholder="Search district name..." style="min-width: 220px;">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="districtsRankingsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-center" style="width: 50px;">Rank</th>
+                        <th>District</th>
+                        <th>State</th>
+                        <th class="text-center">Crime Rate (/ 100k)</th>
+                        <th class="text-center">Safety Score</th>
+                        <th class="text-center">Risk Assessment</th>
+                        <th class="text-end">Annual Incidents</th>
+                        <th class="text-end">Census Population</th>
+                        <th class="text-center">Action Options</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingsTableBody">
+                    {% for dist in rankings.districts %}
+                        <tr class="ranking-item-row" data-name="{{ dist.district|lower }} {{ dist.state|lower }}">
+                            <td class="text-center fw-bold text-muted">
+                                {% if loop.index == 1 %}
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-crown"></i> 1</span>
+                                {% elif loop.index == 2 %}
+                                    <span class="badge bg-secondary"><i class="fas fa-medal"></i> 2</span>
+                                {% elif loop.index == 3 %}
+                                    <span class="badge bg-danger bg-opacity-75"><i class="fas fa-award"></i> 3</span>
+                                {% else %}
+                                    #{{ loop.index }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="text-dark fs-6">{{ dist.district }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-secondary border">{{ dist.state }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="fw-bold fs-6" style="color: {{ dist.risk_color }};">
+                                    {{ dist.crime_rate_per_100k }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border px-2 py-1 fs-6">
+                                    {{ dist.safety_score }} <small class="text-muted">/100</small>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge {{ dist.badge_class }} px-2 py-1">
+                                    {{ dist.risk_level }}
+                                </span>
+                            </td>
+                            <td class="text-end text-muted small">
+                                {{ dist.avg_annual_crimes }} cases/yr
+                            </td>
+                            <td class="text-end text-muted small">
+                                {{ dist.population }}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <form action="{{ url_for('search') }}" method="POST" class="d-inline">
+                                        <input type="hidden" name="location" value="{{ dist.district }}">
+                                        <button type="submit" class="btn btn-outline-primary" title="Analyze Full Profile">
+                                            <i class="fas fa-chart-line"></i> Analyze
+                                        </button>
+                                    </form>
+                                    <a href="{{ url_for('locality_report', location=dist.district) }}" class="btn btn-outline-dark" title="View Printable Dossier">
+                                        <i class="fas fa-file-alt"></i> Dossier
+                                    </a>
+                                    <a href="{{ url_for('compare', loc1=dist.district, loc2='Mumbai') }}" class="btn btn-outline-secondary" title="Compare vs Mumbai">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">
+                                No district records match the selected filters.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('tableQuickSearch');
+    const tbody = document.getElementById('rankingsTableBody');
+    if (searchInput && tbody) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            const rows = tbody.querySelectorAll('.ranking-item-row');
+            rows.forEach(r => {
+                const text = r.dataset.name || '';
+                r.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,21 @@
+{
+    "title": "National Crime Records Bureau (NCRB) District-wise Crime in India (2014-2024 Official Series)",
+    "source_authority": "National Crime Records Bureau (NCRB), Ministry of Home Affairs, Government of India",
+    "portal": "Open Government Data (OGD) Platform India (data.gov.in) & NCRB Reports Portal",
+    "license": "Open Government Data License - India (OGDL)",
+    "years_covered": [
+        2014,
+        2024
+    ],
+    "total_records": 10077,
+    "total_states": 35,
+    "total_districts": 1040,
+    "census_benchmark": "Census of India 2011 (Registrar General & Census Commissioner)",
+    "forecast_horizon": [
+        2025,
+        2026,
+        2027,
+        2028
+    ],
+    "crime_categories_count": 37
+}

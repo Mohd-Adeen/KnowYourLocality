@@ -1,156 +1,700 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <!-- Hero Section with Search -->
+    <!-- Hero Section — full viewport height so map is strictly below fold -->
     <section class="hero-section" style="background-image: url('{{ url_for('static', filename='images/background.jpeg') }}')">
         <div class="hero-overlay"></div>
         <div class="container h-100">
             <div class="row h-100 align-items-center">
                 <div class="col-12 text-center">
-                    <h1 class="display-4 text-white mb-4">A Software for Analysis of Crime in India</h1>
-                    <!--<form action="{{ url_for('search') }}" method="POST" class="search-form">
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control form-control-lg" id="searchInput" 
-                                   name="query" placeholder="Search State or District" autocomplete="off">
-                            <button class="btn btn-primary" type="submit">Search</button>
-                        </div>
-                    </form>-->
+                    <span class="badge hero-badge px-3 py-2 mb-3 text-uppercase">
+                        <i class="fas fa-shield-alt me-1"></i> Data-Driven Civic Safety Intelligence
+                    </span>
+                    <h1 class="hero-title mb-3">Know Your Locality</h1>
+                    <p class="hero-subtitle mb-4">
+                        Transparent, population-normalized crime rate analytics and predictive trend intelligence powered by verified NCRB &amp; Census of India data.
+                    </p>
                     <form action="{{ url_for('search') }}" method="POST" class="search-form" id="searchForm">
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control form-control-lg" 
-                                   name="location" 
-                                   id="searchInput" 
-                                   placeholder="Enter State or District name" 
+                        <div class="search-box-wrapper">
+                            <span class="search-icon">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text"
+                                   class="search-input"
+                                   name="location"
+                                   id="searchInput"
+                                   list="homeAutocompleteOptions"
+                                   placeholder="Search State or District (e.g. Mumbai, Pune, Delhi, Bangalore...)"
                                    autocomplete="off"
                                    required
                                    aria-label="Search location">
-                            <button class="btn btn-primary" type="submit">Analyze</button>
+                            <button class="search-btn" type="submit">
+                                <span>Analyze</span>
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
                         </div>
+                        <datalist id="homeAutocompleteOptions"></datalist>
                     </form>
+                    <div class="popular-hubs-container mt-4">
+                        <span class="popular-label">Popular Hubs:</span>
+                        <button type="button" class="popular-chip" onclick="quickSearch('Mumbai')">Mumbai</button>
+                        <button type="button" class="popular-chip" onclick="quickSearch('Pune')">Pune</button>
+                        <button type="button" class="popular-chip" onclick="quickSearch('Bangalore')">Bangalore</button>
+                        <button type="button" class="popular-chip" onclick="quickSearch('Delhi UT')">Delhi</button>
+                        <button type="button" class="popular-chip" onclick="quickSearch('Maharashtra')">Maharashtra</button>
+                        <button type="button" class="popular-chip" onclick="quickSearch('Jaipur')">Jaipur</button>
+                        <button type="button" class="popular-chip" onclick="quickSearch('Kolkata')">Kolkata</button>
+                    </div>
+                    <!-- Scroll hint -->
+                    <div class="scroll-hint mt-5">
+                        <div class="scroll-hint-arrow"><i class="fas fa-chevron-down"></i></div>
+                        <small class="scroll-hint-label">Scroll to explore</small>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Prediction Section -->
-    <section class="py-5">
+    <!-- ════════════════════════════════════════════════════════════
+         EMERGENCY HELPLINES & DISCLAIMER CAROUSEL
+         Sits between the hero (above fold) and the map (below fold)
+    ═══════════════════════════════════════════════════════════════ -->
+    <section class="emergency-carousel-section py-5">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h2 class="mb-4">Crime Prediction</h2>
-                    <p>Our advanced algorithms analyze historical crime data to predict future crime trends in different regions of India. This helps law enforcement agencies and citizens to be better prepared.</p>
-                    <a href="{{ url_for('predict') }}" class="btn btn-primary mt-3">Prediction</a>
-                </div>
-                <div class="col-lg-6">
-                    <img src="{{ url_for('static', filename='images/prediction.jpg') }}" alt="Crime Prediction" class="img-fluid rounded">
-                </div>
+            <div class="text-center mb-4">
+                <span class="badge bg-danger bg-opacity-10 text-danger fw-bold text-uppercase px-3 py-2 mb-2">
+                    <i class="fas fa-phone-alt me-1"></i> Emergency &amp; Safety
+                </span>
+                <h2 class="fw-bold mb-1">National Emergency Helplines</h2>
+                <p class="text-muted small">Government of India toll-free services — available 24 × 7</p>
             </div>
+
+            <div id="emergencyCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
+                <div class="carousel-indicators helpline-indicators">
+                    <button type="button" data-bs-target="#emergencyCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                    <button type="button" data-bs-target="#emergencyCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                    <button type="button" data-bs-target="#emergencyCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                    <button type="button" data-bs-target="#emergencyCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+                    <button type="button" data-bs-target="#emergencyCarousel" data-bs-slide-to="4" aria-label="Slide 5"></button>
+                    <button type="button" data-bs-target="#emergencyCarousel" data-bs-slide-to="5" aria-label="Slide 6"></button>
+                    <button type="button" data-bs-target="#emergencyCarousel" data-bs-slide-to="6" aria-label="Slide 7"></button>
+                    <button type="button" data-bs-target="#emergencyCarousel" data-bs-slide-to="7" aria-label="Slide 8"></button>
+                </div>
+
+                <div class="carousel-inner pb-5">
+
+                    <!-- Slide 1: Police -->
+                    <div class="carousel-item active">
+                        <div class="helpline-card helpline-police mx-auto">
+                            <div class="helpline-icon-wrap"><i class="fas fa-shield-alt"></i></div>
+                            <div class="helpline-number">100</div>
+                            <h5 class="helpline-name">Police Emergency</h5>
+                            <p class="helpline-desc">Immediate police response for crimes in progress, threats to life, and law-and-order incidents. Available 24 × 7 across all Indian states.</p>
+                            <a href="tel:100" class="helpline-btn btn-police"><i class="fas fa-phone me-2"></i>Call 100</a>
+                        </div>
+                    </div>
+
+                    <!-- Slide 2: Fire -->
+                    <div class="carousel-item">
+                        <div class="helpline-card helpline-fire mx-auto">
+                            <div class="helpline-icon-wrap"><i class="fas fa-fire-extinguisher"></i></div>
+                            <div class="helpline-number">101</div>
+                            <h5 class="helpline-name">Fire Brigade</h5>
+                            <p class="helpline-desc">Fire emergencies, building collapses, gas leaks, and rescue operations. Operated by state fire departments with rapid deployment.</p>
+                            <a href="tel:101" class="helpline-btn btn-fire"><i class="fas fa-phone me-2"></i>Call 101</a>
+                        </div>
+                    </div>
+
+                    <!-- Slide 3: Ambulance -->
+                    <div class="carousel-item">
+                        <div class="helpline-card helpline-ambulance mx-auto">
+                            <div class="helpline-icon-wrap"><i class="fas fa-ambulance"></i></div>
+                            <div class="helpline-number">102</div>
+                            <h5 class="helpline-name">Ambulance Services</h5>
+                            <p class="helpline-desc">Medical emergencies, road accidents, and maternal transport. Free ambulance service under the National Health Mission (NHM).</p>
+                            <a href="tel:102" class="helpline-btn btn-ambulance"><i class="fas fa-phone me-2"></i>Call 102</a>
+                        </div>
+                    </div>
+
+                    <!-- Slide 4: National Emergency -->
+                    <div class="carousel-item">
+                        <div class="helpline-card helpline-national mx-auto">
+                            <div class="helpline-icon-wrap"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="helpline-number">112</div>
+                            <h5 class="helpline-name">National Emergency</h5>
+                            <p class="helpline-desc">Single-point national emergency number integrating Police, Fire &amp; Medical. Works even without a SIM card on any mobile phone. First call in any crisis.</p>
+                            <a href="tel:112" class="helpline-btn btn-national"><i class="fas fa-phone me-2"></i>Call 112</a>
+                        </div>
+                    </div>
+
+                    <!-- Slide 5: Women Helpline -->
+                    <div class="carousel-item">
+                        <div class="helpline-card helpline-women mx-auto">
+                            <div class="helpline-icon-wrap"><i class="fas fa-female"></i></div>
+                            <div class="helpline-number">1091 / 181</div>
+                            <h5 class="helpline-name">Women &amp; Girls Helpline</h5>
+                            <p class="helpline-desc">Immediate support for women facing harassment, domestic violence, or distress. 181 provides counselling and shelter referrals, operated by state governments.</p>
+                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                <a href="tel:1091" class="helpline-btn btn-women"><i class="fas fa-phone me-2"></i>Call 1091</a>
+                                <a href="tel:181" class="helpline-btn btn-women"><i class="fas fa-phone me-2"></i>Call 181</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 6: Childline -->
+                    <div class="carousel-item">
+                        <div class="helpline-card helpline-child mx-auto">
+                            <div class="helpline-icon-wrap"><i class="fas fa-child"></i></div>
+                            <div class="helpline-number">1098</div>
+                            <h5 class="helpline-name">Childline India</h5>
+                            <p class="helpline-desc">24-hour emergency support for children in distress — abuse, trafficking, missing children. Managed by Ministry of Women &amp; Child Development.</p>
+                            <a href="tel:1098" class="helpline-btn btn-child"><i class="fas fa-phone me-2"></i>Call 1098</a>
+                        </div>
+                    </div>
+
+                    <!-- Slide 7: Cybercrime -->
+                    <div class="carousel-item">
+                        <div class="helpline-card helpline-cyber mx-auto">
+                            <div class="helpline-icon-wrap"><i class="fas fa-shield-virus"></i></div>
+                            <div class="helpline-number">1930</div>
+                            <h5 class="helpline-name">Cyber Crime Helpline</h5>
+                            <p class="helpline-desc">Report online fraud, financial scams, cyber stalking &amp; digital crimes. Also report at <strong>cybercrime.gov.in</strong> — managed by Ministry of Home Affairs.</p>
+                            <a href="tel:1930" class="helpline-btn btn-cyber"><i class="fas fa-phone me-2"></i>Call 1930</a>
+                        </div>
+                    </div>
+
+                    <!-- Slide 8: Disclaimer -->
+                    <div class="carousel-item">
+                        <div class="helpline-card helpline-disclaimer mx-auto">
+                            <div class="helpline-icon-wrap"><i class="fas fa-info-circle"></i></div>
+                            <div class="helpline-number" style="font-size:1.6rem;letter-spacing:0">Data Notice</div>
+                            <h5 class="helpline-name">About This Platform</h5>
+                            <p class="helpline-desc">
+                                Crime data is sourced from <strong>NCRB (National Crime Records Bureau)</strong> annual reports (official district reports 2014–2024 across all 9 crime domains). Safety scores use <strong>Census of India 2011</strong> benchmarks. For <strong>informational &amp; research purposes only</strong>. Does not constitute legal advice.
+                            </p>
+                            <a href="{{ url_for('about') }}" class="helpline-btn btn-disclaimer"><i class="fas fa-book me-2"></i>Learn More</a>
+                        </div>
+                    </div>
+
+                </div><!-- /.carousel-inner -->
+
+                <button class="carousel-control-prev helpline-control" type="button" data-bs-target="#emergencyCarousel" data-bs-slide="prev">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="carousel-control-next helpline-control" type="button" data-bs-target="#emergencyCarousel" data-bs-slide="next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div><!-- /.carousel -->
         </div>
     </section>
 
-    <!-- About Us Section -->
-    <section class="py-5">
+    <!-- State-wise Crime Rate Heatmap of India -->
+    <section class="py-5 bg-white border-bottom" id="heatmap-section">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h2 class="mb-4">About Us</h2>
-                    <p>We are a team of final-year Computer Engineering students passionate about using technology to address real-world issues. As part of our academic project, we are developing a website focused on analyzing and understanding crime patterns across India. Our platform combines data analytics, machine learning, and visualization tools to provide users with valuable insights into crime trends, hotspots, and safety patterns. By making crime data more accessible and understandable, we aim to empower citizens, law enforcement, and policymakers to make informed decisions and take proactive steps towards a safer India. Through innovation and collaboration, we strive to contribute to a safer, more secure society.</p>
+            <!-- Header -->
+            <div class="d-flex flex-wrap justify-content-between align-items-end mb-4">
+                <div>
+                    <span class="badge bg-danger bg-opacity-10 text-danger fw-bold text-uppercase px-3 py-1 mb-2">
+                        <i class="fas fa-fire-alt me-1"></i> State-wise Crime Heatmap
+                    </span>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-fire text-danger me-2"></i> State-wise Crime Rate Heatmap of India
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Calculated average crime rates per 100,000 citizens across all 35 States &amp; Union Territories, with heat intensity reflecting population-normalized NCRB records.
+                    </p>
                 </div>
-                <div class="col-lg-6">
-                    <img src="{{ url_for('static', filename='images/about.jpg') }}" alt="About Us" class="img-fluid rounded">
+                <div class="mt-3 mt-lg-0 d-flex gap-2 align-items-center flex-wrap">
+                    <button type="button" class="btn btn-sm btn-outline-secondary map-control-btn" id="btnToggleHeat" title="Toggle heat glow layer">
+                        <i class="fas fa-layer-group me-1"></i> Toggle Heatmap Glow
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary map-control-btn" id="btnToggleMarkers" title="Toggle state markers">
+                        <i class="fas fa-map-marker-alt me-1"></i> Toggle State Markers
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary map-control-btn" id="btnResetView" title="Reset map to India view">
+                        <i class="fas fa-sync-alt me-1"></i> Reset View
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Cards: Calculated Average Data & Extremes -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="heatmap-kpi-card border-top border-primary border-3">
+                        <div class="text-muted small text-uppercase fw-bold mb-1">National Avg Crime Rate</div>
+                        <div class="heatmap-kpi-val text-primary" id="kpiNationalAvg">
+                            {{ heatmap_summary.national_weighted_avg if heatmap_summary else '238.3' }}
+                        </div>
+                        <div class="small text-muted mt-1">
+                            <i class="fas fa-balance-scale me-1 text-primary"></i> Crimes / 100k population
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="heatmap-kpi-card border-top border-success border-3">
+                        <div class="text-muted small text-uppercase fw-bold mb-1">Lowest Heat / Safest State</div>
+                        <div class="heatmap-kpi-val text-success" id="kpiLowestState">
+                            {{ heatmap_summary.lowest_state if heatmap_summary else 'Nagaland' }}
+                        </div>
+                        <div class="small text-success mt-1 fw-semibold">
+                            <i class="fas fa-shield-alt me-1"></i> {{ heatmap_summary.lowest_state_rate if heatmap_summary else '83.5' }} crimes / 100k
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="heatmap-kpi-card border-top border-danger border-3">
+                        <div class="text-muted small text-uppercase fw-bold mb-1">Highest Heat Intensity</div>
+                        <div class="heatmap-kpi-val text-danger" id="kpiHighestState">
+                            {{ heatmap_summary.highest_state if heatmap_summary else 'Chandigarh' }}
+                        </div>
+                        <div class="small text-danger mt-1 fw-semibold">
+                            <i class="fas fa-fire me-1"></i> {{ heatmap_summary.highest_state_rate if heatmap_summary else '541.9' }} crimes / 100k
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="heatmap-kpi-card border-top border-info border-3">
+                        <div class="text-muted small text-uppercase fw-bold mb-1">Geographic Coverage</div>
+                        <div class="heatmap-kpi-val text-dark" id="kpiTotalStates">
+                            {{ heatmap_summary.total_states if heatmap_summary else '35' }} States &amp; UTs
+                        </div>
+                        <div class="small text-muted mt-1">
+                            <i class="fas fa-check-circle me-1 text-success"></i> 100% Census Normalized
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heat Intensity Legend & Quick Guide -->
+            <div class="card bg-light border-0 p-3 mb-3">
+                <div class="row align-items-center g-2">
+                    <div class="col-lg-3 col-md-4">
+                        <div class="fw-bold small text-uppercase text-secondary">
+                            <i class="fas fa-palette me-1"></i> Heat Intensity Scale:
+                        </div>
+                    </div>
+                    <div class="col-lg-9 col-md-8">
+                        <div class="heatmap-legend-bar mb-2"></div>
+                        <div class="d-flex justify-content-between flex-wrap text-muted small" style="font-size: 0.75rem;">
+                            <span><i class="fas fa-circle text-success me-1"></i><strong>Low Heat:</strong> &lt; 160 / 100k</span>
+                            <span><i class="fas fa-circle text-warning me-1"></i><strong>Moderate Heat:</strong> 160 – 260 / 100k</span>
+                            <span><i class="fas fa-circle me-1" style="color:#fd7e14;"></i><strong>High Heat:</strong> 260 – 360 / 100k</span>
+                            <span><i class="fas fa-circle text-danger me-1"></i><strong>Severe Heat:</strong> &gt; 360 / 100k</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaflet Map Container -->
+            <div class="card shadow-sm border-0 p-1 position-relative">
+                <div id="localityMap" style="height: 520px; width: 100%; border-radius: 8px;"></div>
+                <div class="position-absolute bottom-0 start-0 m-3 px-2 py-1 bg-white bg-opacity-90 rounded shadow-sm small text-muted d-none d-md-block" style="z-index: 1000; font-size: 0.75rem;">
+                    <i class="fas fa-mouse-pointer text-primary me-1"></i> Hover to inspect crime rate | Click state marker to explore data
+                </div>
+            </div>
+
+            <!-- Expandable State Crime Ranking Table Drawer -->
+            <div class="mt-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <button class="btn btn-sm btn-outline-dark fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#stateRankingsCollapse" aria-expanded="false" aria-controls="stateRankingsCollapse">
+                        <i class="fas fa-list-ol me-1"></i> View All 35 States Crime Rate Rankings <i class="fas fa-chevron-down ms-1"></i>
+                    </button>
+                    <small class="text-muted">Click any state row to locate and inspect on map</small>
+                </div>
+                <div class="collapse mt-3" id="stateRankingsCollapse">
+                    <div class="card card-body border shadow-sm p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <h6 class="fw-bold mb-0">State-wise Average Crime Rates (Sorted by Heat Intensity)</h6>
+                            <input type="text" id="stateTableFilter" class="form-control form-control-sm" placeholder="Filter state..." style="max-width: 200px;">
+                        </div>
+                        <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+                            <table class="table table-hover table-sm align-middle mb-0" id="stateRankingsTable">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>State / UT</th>
+                                        <th>Calculated Avg Rate (/ 100k)</th>
+                                        <th>Heat Level</th>
+                                        <th>Safety Score</th>
+                                        <th>Annual Avg Crimes</th>
+                                        <th>Population</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stateRankingsBody">
+                                    <!-- Populated dynamically via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Team Section -->
+    <!-- Features Showcase (Compare + Prediction) -->
     <section class="py-5 bg-light">
         <div class="container">
-            <h2 class="text-center mb-5">Meet Our Team</h2>
-            <div class="row">
-                <div class="col-md-3 text-center mb-4">
-                    <img src="{{ url_for('static', filename='images/team/team1.jpeg') }}" class="img-fluid rounded-circle mb-3" alt="Team Member" width="150">
-                    <h4>Mohd. Adeen Ansari</h4>
-                    <p class="text-muted">Software Developer and Data Scientist</p>
-                </div>
-                <div class="col-md-3 text-center mb-4">
-                    <img src="{{ url_for('static', filename='images/team/team2.jpeg') }}" class="img-fluid rounded-circle mb-3" alt="Team Member" width="150">
-                    <h4>Kabir Selot</h4>
-                    <p class="text-muted">Web Developer</p>
-                </div>
-                <div class="col-md-3 text-center mb-4">
-                    <img src="{{ url_for('static', filename='images/team/team3.jpeg') }}" class="img-fluid rounded-circle mb-3" alt="Team Member" width="150">
-                    <h4>Aamir Bhattaria</h4>
-                    <p class="text-muted">Web Designer</p>
-                </div>
-                <div class="col-md-3 text-center mb-4">
-                    <img src="{{ url_for('static', filename='images/team/team4.jpeg') }}" class="img-fluid rounded-circle mb-3" alt="Team Member" width="150">
-                    <h4>Pranali Thorat</h4>
-                    <p class="text-muted">Admin</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- News Carousel -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="text-center mb-5">Real-Time Crime News in India</h2>
-            <div class="news-carousel">
-                <div class="news-track">
-                    <div class="news-item">
-                        <h5>Cyber Crime Cases Rise by 30% in 2023</h5>
-                        <p>Latest reports show a significant increase in online fraud cases across major cities.</p>
+            <div class="row g-4">
+                <!-- Prediction Feature Card -->
+                <div class="col-lg-6">
+                    <div class="card h-100 shadow-sm border-0 p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                                <i class="fas fa-chart-line fs-3"></i>
+                            </div>
+                            <div>
+                                <h3 class="h4 fw-bold mb-0">Crime Forecasting</h3>
+                                <small class="text-muted">Statistical ARIMA Time-Series Models</small>
+                            </div>
+                        </div>
+                        <p class="text-secondary leading-relaxed">
+                            Project multi-year trajectories across major crime heads with 90% confidence bands. Helps citizens, researchers, and local organizations prepare proactively.
+                        </p>
+                        <div class="mt-auto pt-3">
+                            <a href="{{ url_for('predict') }}" class="btn btn-outline-primary fw-bold">
+                                Try Forecast Engine <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
                     </div>
-                    <div class="news-item">
-                        <h5>New Police Initiative Reduces Street Crime</h5>
-                        <p>Community policing program shows promising results in Delhi neighborhoods.</p>
-                    </div>
-                    <div class="news-item">
-                        <h5>Supreme Court Ruling on Digital Privacy</h5>
-                        <p>Landmark judgment strengthens protections against unauthorized data collection.</p>
-                    </div>
-                    <div class="news-item">
-                        <h5>Women's Safety App Launched Nationwide</h5>
-                        <p>Government introduces new emergency response system for women in distress.</p>
+                </div>
+                <!-- Locality Comparison Card -->
+                <div class="col-lg-6">
+                    <div class="card h-100 shadow-sm border-0 p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-3 me-3">
+                                <i class="fas fa-balance-scale fs-3"></i>
+                            </div>
+                            <div>
+                                <h3 class="h4 fw-bold mb-0">Compare Two Localities</h3>
+                                <small class="text-muted">Side-by-Side Safety &amp; Vulnerability Benchmarks</small>
+                            </div>
+                        </div>
+                        <p class="text-secondary leading-relaxed">
+                            Moving to a new city or evaluating property safety? Compare two districts side-by-side to understand relative safety scores, per-capita crime rates, and domain advantages.
+                        </p>
+                        <div class="mt-auto pt-3">
+                            <a href="{{ url_for('compare', loc1='Mumbai', loc2='Pune') }}" class="btn btn-outline-danger fw-bold">
+                                Compare Mumbai vs Pune <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Contact Section -->
-    <section class="py-5 bg-light">
+    <!-- Verified Emergency Helplines Grid -->
+    <section class="py-5 bg-white">
         <div class="container">
-            <h2 class="text-center mb-5">Contact Us</h2>
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <form action="{{ url_for('contact') }}" method="POST">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <input type="text" class="form-control" name="name" placeholder="Your Name" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <input type="email" class="form-control" name="email" placeholder="Your Email" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" name="phone" placeholder="Phone Number">
-                        </div>
-                        <div class="mb-3">
-                            <textarea class="form-control" name="message" rows="5" placeholder="Your Message" required></textarea>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary">Send Message</button>
-                        </div>
-                    </form>
+            <div class="text-center mb-5">
+                <span class="badge bg-danger bg-opacity-10 text-danger fw-bold text-uppercase px-3 py-2 mb-2">
+                    <i class="fas fa-life-ring me-1"></i> Official Civic Safety Network
+                </span>
+                <h2 class="fw-bold">Verified Citizen Emergency Helplines</h2>
+                <p class="text-muted mx-auto" style="max-width: 600px;">
+                    Government of India toll-free national emergency response and victim assistance services.
+                </p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm h-100 border-0 border-top border-danger border-4 text-center p-3">
+                        <div class="display-6 text-danger fw-bold mb-1">112</div>
+                        <h6 class="fw-bold mb-1">National Emergency</h6>
+                        <small class="text-muted mb-3 d-block">Police, Fire &amp; Medical Crisis</small>
+                        <a href="tel:112" class="btn btn-sm btn-outline-danger mt-auto">Call 112</a>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm h-100 border-0 border-top border-primary border-4 text-center p-3">
+                        <div class="display-6 text-primary fw-bold mb-1">1091</div>
+                        <h6 class="fw-bold mb-1">Women Helpline</h6>
+                        <small class="text-muted mb-3 d-block">Safety &amp; Distress Support</small>
+                        <a href="tel:1091" class="btn btn-sm btn-outline-primary mt-auto">Call 1091 / 181</a>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm h-100 border-0 border-top border-info border-4 text-center p-3">
+                        <div class="display-6 text-info fw-bold mb-1">1930</div>
+                        <h6 class="fw-bold mb-1">Cyber Crime Helpline</h6>
+                        <small class="text-muted mb-3 d-block">Financial Fraud &amp; Cyber Support</small>
+                        <a href="tel:1930" class="btn btn-sm btn-outline-info mt-auto">Call 1930</a>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm h-100 border-0 border-top border-success border-4 text-center p-3">
+                        <div class="display-6 text-success fw-bold mb-1">1098</div>
+                        <h6 class="fw-bold mb-1">Childline India</h6>
+                        <small class="text-muted mb-3 d-block">Child Care &amp; Emergency Aid</small>
+                        <a href="tel:1098" class="btn btn-sm btn-outline-success mt-auto">Call 1098</a>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Quick Contact Hook -->
+    <section class="py-5 bg-light border-top">
+        <div class="container text-center">
+            <h3 class="fw-bold mb-2">Have Inquiries or Feedback?</h3>
+            <p class="text-muted mb-4 mx-auto" style="max-width: 500px;">
+                Reach out to our engineering team with your questions, data inquiries, or feature suggestions.
+            </p>
+            <a href="{{ url_for('contact') }}" class="btn btn-primary btn-lg px-4">
+                <i class="fas fa-envelope me-1"></i> Contact Engineering Team
+            </a>
         </div>
     </section>
 {% endblock %}
 
 {% block scripts %}
+    <!-- Leaflet CSS & JS for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='js/leaflet-heat.js') }}"></script>
     <script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/carousel.js') }}"></script>
+    <script>
+        function quickSearch(loc) {
+            const input = document.getElementById('searchInput');
+            const form = document.getElementById('searchForm');
+            if (input && form) {
+                input.value = loc;
+                form.submit();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapContainer = document.getElementById('localityMap');
+            if (!mapContainer) return;
+
+            // Pan-India default center and zoom
+            const defaultCenter = [22.8, 80.0];
+            const defaultZoom = 5;
+
+            const map = L.map('localityMap', {
+                center: defaultCenter,
+                zoom: defaultZoom,
+                minZoom: 4,
+                maxZoom: 12,
+                scrollWheelZoom: false
+            });
+
+            // Enable scroll wheel zoom on user interaction
+            map.on('click', function() { map.scrollWheelZoom.enable(); });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors | NCRB Ministry of Home Affairs'
+            }).addTo(map);
+
+            let heatLayer = null;
+            const markerLayerGroup = L.layerGroup().addTo(map);
+            const stateMarkers = {};
+            let mapDataPoints = [];
+
+            // Fetch state-wise calculated average crime rate data
+            fetch('/api/map-data')
+                .then(res => res.json())
+                .then(points => {
+                    mapDataPoints = points;
+                    if (!points || !points.length) return;
+
+                    // 1. Prepare Heatmap Layer points: [lat, lng, heat_intensity]
+                    // Normalized heat intensity derived from calculated average crime rates
+                    const heatPoints = points.map(pt => [
+                        pt.lat,
+                        pt.lng,
+                        pt.heat_intensity !== undefined ? pt.heat_intensity : 0.5
+                    ]);
+
+                    if (typeof L.heatLayer === 'function') {
+                        heatLayer = L.heatLayer(heatPoints, {
+                            radius: 46,
+                            blur: 26,
+                            maxZoom: 9,
+                            max: 1.0,
+                            minOpacity: 0.35,
+                            gradient: {
+                                0.2: '#28a745',  // Low Heat (Green)
+                                0.4: '#f1c40f',  // Moderate Heat (Amber/Yellow)
+                                0.6: '#fd7e14',  // Warm / Elevated Heat (Orange)
+                                0.8: '#dc3545',  // High Heat (Red)
+                                1.0: '#8b0000'   // Critical Heat (Dark Crimson)
+                            }
+                        }).addTo(map);
+                    }
+
+                    // 2. Add interactive State Heat Markers
+                    points.forEach((pt) => {
+                        const markerColor = pt.heat_color || pt.risk_color || '#e74c3c';
+                        // Radius dynamically reflects the calculated heat intensity
+                        const markerRadius = Math.round(10 + (pt.heat_intensity || 0.4) * 8);
+
+                        const circle = L.circleMarker([pt.lat, pt.lng], {
+                            radius: markerRadius,
+                            fillColor: markerColor,
+                            color: '#ffffff',
+                            weight: 2.5,
+                            opacity: 0.95,
+                            fillOpacity: 0.85,
+                            className: 'state-pulse-marker'
+                        });
+
+                        // Hover tooltip: quick rate readout
+                        circle.bindTooltip(`
+                            <div style="font-family: inherit;">
+                                <strong>${pt.name}</strong><br>
+                                Calculated Avg: <strong>${pt.crime_rate_per_100k}</strong> / 100k<br>
+                                <span class="badge ${pt.heat_badge || 'bg-secondary'}" style="font-size:0.7rem;">${pt.heat_level || 'State Heat'}</span>
+                            </div>
+                        `, {
+                            sticky: true,
+                            direction: 'top',
+                            offset: [0, -6]
+                        });
+
+                        // Click popup: detailed state crime analytics card
+                        const popupHtml = `
+                            <div class="state-popup-card p-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                    <h6 class="fw-bold mb-0 text-dark">${pt.name}</h6>
+                                    <span class="badge ${pt.heat_badge || 'bg-secondary'} px-2 py-1">${pt.heat_level || 'State'}</span>
+                                </div>
+                                <div class="p-2 mb-2 rounded bg-light border">
+                                    <div class="text-muted text-uppercase fw-bold" style="font-size:0.68rem;letter-spacing:0.04em;">Calculated Avg Crime Rate</div>
+                                    <div class="d-flex align-items-baseline">
+                                        <span class="fs-4 fw-bold me-1" style="color: ${markerColor};">${pt.crime_rate_per_100k}</span>
+                                        <small class="text-muted">crimes / 100k</small>
+                                    </div>
+                                    <div class="small ${pt.vs_national_class || 'text-muted'} fw-semibold" style="font-size:0.75rem;">
+                                        ${pt.vs_national_text || ''}
+                                    </div>
+                                </div>
+                                <div class="small text-secondary mb-3" style="font-size:0.8rem; line-height: 1.5;">
+                                    <div><i class="fas fa-shield-alt text-primary me-1"></i> Safety Score: <strong>${pt.safety_score}/100</strong></div>
+                                    <div><i class="fas fa-file-invoice text-secondary me-1"></i> Annual Avg Incidents: <strong>${(pt.avg_annual_crimes || 0).toLocaleString()}</strong></div>
+                                    <div><i class="fas fa-users text-secondary me-1"></i> Census Population: <strong>${pt.population}</strong></div>
+                                </div>
+                                <button onclick="quickSearch('${pt.query || pt.name}')" class="btn btn-sm btn-primary w-100 py-1 fw-semibold" style="font-size:0.78rem;">
+                                    <i class="fas fa-chart-line me-1"></i> Analyze Full Data for ${pt.name}
+                                </button>
+                            </div>
+                        `;
+                        circle.bindPopup(popupHtml, { minWidth: 230 });
+
+                        markerLayerGroup.addLayer(circle);
+                        stateMarkers[pt.name.toLowerCase()] = { circle: circle, lat: pt.lat, lng: pt.lng };
+                    });
+
+                    // 3. Populate State Rankings Table
+                    populateRankingsTable(points);
+                })
+                .catch(err => console.error('Error loading state heatmap data:', err));
+
+            // Controls: Toggle Heatmap Glow
+            const btnToggleHeat = document.getElementById('btnToggleHeat');
+            if (btnToggleHeat) {
+                let heatVisible = true;
+                btnToggleHeat.addEventListener('click', function() {
+                    if (!heatLayer) return;
+                    if (heatVisible) {
+                        map.removeLayer(heatLayer);
+                        heatVisible = false;
+                        btnToggleHeat.classList.replace('btn-outline-secondary', 'btn-secondary');
+                        btnToggleHeat.innerHTML = '<i class="fas fa-eye me-1"></i> Show Heatmap Glow';
+                    } else {
+                        map.addLayer(heatLayer);
+                        heatVisible = true;
+                        btnToggleHeat.classList.replace('btn-secondary', 'btn-outline-secondary');
+                        btnToggleHeat.innerHTML = '<i class="fas fa-layer-group me-1"></i> Toggle Heatmap Glow';
+                    }
+                });
+            }
+
+            // Controls: Toggle State Markers
+            const btnToggleMarkers = document.getElementById('btnToggleMarkers');
+            if (btnToggleMarkers) {
+                let markersVisible = true;
+                btnToggleMarkers.addEventListener('click', function() {
+                    if (markersVisible) {
+                        map.removeLayer(markerLayerGroup);
+                        markersVisible = false;
+                        btnToggleMarkers.classList.replace('btn-outline-secondary', 'btn-secondary');
+                        btnToggleMarkers.innerHTML = '<i class="fas fa-eye me-1"></i> Show State Markers';
+                    } else {
+                        map.addLayer(markerLayerGroup);
+                        markersVisible = true;
+                        btnToggleMarkers.classList.replace('btn-secondary', 'btn-outline-secondary');
+                        btnToggleMarkers.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i> Toggle State Markers';
+                    }
+                });
+            }
+
+            // Controls: Reset View
+            const btnResetView = document.getElementById('btnResetView');
+            if (btnResetView) {
+                btnResetView.addEventListener('click', function() {
+                    map.setView(defaultCenter, defaultZoom);
+                });
+            }
+
+            // Table Population & Search Filter
+            function populateRankingsTable(points) {
+                const tbody = document.getElementById('stateRankingsBody');
+                if (!tbody) return;
+
+                // Sort descending by calculated average crime rate (highest heat first)
+                const sorted = [...points].sort((a, b) => b.crime_rate_per_100k - a.crime_rate_per_100k);
+                tbody.innerHTML = '';
+
+                sorted.forEach((pt, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'state-ranking-row';
+                    tr.dataset.statename = pt.name.toLowerCase();
+                    tr.innerHTML = `
+                        <td class="text-muted small">${index + 1}</td>
+                        <td class="fw-bold text-dark">${pt.name}</td>
+                        <td>
+                            <span class="fw-bold" style="color:${pt.heat_color || '#333'};">${pt.crime_rate_per_100k}</span>
+                            <span class="small text-muted">/ 100k</span>
+                        </td>
+                        <td><span class="badge ${pt.heat_badge || 'bg-secondary'}">${pt.heat_level || 'N/A'}</span></td>
+                        <td><span class="badge bg-light text-dark border">${pt.safety_score}/100</span></td>
+                        <td class="small">${(pt.avg_annual_crimes || 0).toLocaleString()}</td>
+                        <td class="small text-muted">${pt.population}</td>
+                        <td>
+                            <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 locate-btn" style="font-size:0.75rem;">
+                                <i class="fas fa-map-pin me-1"></i> Locate
+                            </button>
+                        </td>
+                    `;
+
+                    // Clicking row pans map smoothly to that state and opens popup
+                    tr.addEventListener('click', function() {
+                        const target = stateMarkers[pt.name.toLowerCase()];
+                        if (target) {
+                            map.flyTo([target.lat, target.lng], 7, { duration: 1.2 });
+                            setTimeout(() => target.circle.openPopup(), 1200);
+                            const section = document.getElementById('heatmap-section');
+                            if (section) section.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+
+                    tbody.appendChild(tr);
+                });
+
+                // Filter search input
+                const filterInput = document.getElementById('stateTableFilter');
+                if (filterInput) {
+                    filterInput.addEventListener('input', function() {
+                        const q = this.value.trim().toLowerCase();
+                        const rows = tbody.querySelectorAll('tr');
+                        rows.forEach(r => {
+                            r.style.display = r.dataset.statename.includes(q) ? '' : 'none';
+                        });
+                    });
+                }
+            }
+        });
+    </script>
 {% endblock %}

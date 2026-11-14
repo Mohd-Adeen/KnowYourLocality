@@ -29,6 +29,12 @@
                         <a class="nav-link" href="{{ url_for('predict') }}">Prediction</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('compare') }}">Compare</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('rankings') }}">Rankings</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('about') }}">About Us</a>
                     </li>
                     <li class="nav-item">
@@ -38,6 +44,20 @@
             </div>
         </div>
     </nav>
+
+    <!-- Flash Messages (Only rendered when messages exist) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container" style="padding-top: 85px; position: relative; z-index: 1050;">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' or category == 'message' else category }} alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="fas fa-info-circle me-2"></i> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
     {% block content %}
     {% endblock %}
@@ -58,6 +78,7 @@
                     <ul class="list-unstyled">
                         <li><a href="{{ url_for('index') }}" class="text-white">Home</a></li>
                         <li><a href="{{ url_for('predict') }}" class="text-white">Prediction</a></li>
+                        <li><a href="{{ url_for('compare') }}" class="text-white">Compare Localities</a></li>
                         <li><a href="{{ url_for('about') }}" class="text-white">About Us</a></li>
                         <li><a href="{{ url_for('contact') }}" class="text-white">Contact Us</a></li>
                     </ul>

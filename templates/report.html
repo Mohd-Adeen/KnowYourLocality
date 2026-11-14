@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+/* Print Stylesheet */
+@media print {
+    .navbar, .footer, .no-print, .btn, .alert {
+        display: none !important;
+    }
+    body {
+        padding-top: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt;
+    }
+    .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+    }
+    .dossier-header {
+        border-bottom: 2px solid #000 !important;
+    }
+    .page-break {
+        page-break-before: always;
+    }
+}
+.report-kpi-card {
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 1rem;
+    height: 100%;
+}
+</style>
+
+<div class="container mt-4 pt-3 pb-5">
+    <!-- Top Action Bar (Screen Only) -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom no-print flex-wrap gap-2">
+        <div>
+            <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i> Home
+            </a>
+            <span class="text-muted small">
+                <i class="fas fa-file-alt text-primary me-1"></i> Official Locality Safety Dossier
+            </span>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <button onclick="window.print()" class="btn btn-sm btn-danger fw-semibold">
+                <i class="fas fa-print me-1"></i> Print / Save as PDF
+            </button>
+            <a href="{{ url_for('export_csv', location=analysis.location) }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-download me-1"></i> Download CSV (Historical)
+            </a>
+            {% if prediction %}
+            <a href="{{ url_for('export_forecast_csv', location=analysis.location) }}" class="btn btn-sm btn-outline-info">
+                <i class="fas fa-file-csv me-1"></i> Download Forecast CSV
+            </a>
+            {% endif %}
+            <button id="bookmarkBtn" onclick="toggleBookmark('{{ analysis.location }}')" 
+                    class="btn btn-sm {% if is_saved %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                <i class="fas fa-star me-1"></i> <span id="bookmarkText">{% if is_saved %}Saved{% else %}Bookmark{% endif %}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Official Dossier Container -->
+    <div class="card shadow-sm border-0 p-4 p-md-5 bg-white">
+        <!-- Header Banner -->
+        <div class="dossier-header pb-3 mb-4 border-bottom">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <span class="badge bg-dark text-white px-2 py-1 text-uppercase mb-2">
+                        Official Government Incident Benchmark
+                    </span>
+                    <h1 class="display-6 fw-bold mb-1 text-dark">
+                        {{ analysis.location }} <small class="text-muted fs-4">({{ analysis.state_name }})</small>
+                    </h1>
+                    <p class="text-muted mb-0 small">
+                        Source Authority: National Crime Records Bureau (NCRB) &bull; Census of India 2011 Benchmarks
+                    </p>
+                </div>
+                <div class="text-md-end text-start">
+                    <div class="small text-muted text-uppercase fw-semibold">Classification</div>
+                    <span class="badge bg-light text-dark border px-3 py-1 fs-6 mb-1">
+                        {{ analysis.type|title }} Level Administrative Unit
+                    </span>
+                    <div class="small text-muted">Period Evaluated: <strong>{{ analysis.period }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Executive Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="report-kpi-card text-center border-top border-primary border-3">
+                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Safety Score Index</small>
+                    <div class="display-5 fw-bold text-primary mb-0">
+                        {{ analysis.safety_score }}<span class="fs-6 text-muted">/100</span>
+                    </div>
+                    <span class="badge {{ analysis.safety_badge_class }} mt-2">{{ analysis.risk_level }}</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="report-kpi-card text-center border-top border-info border-3">
+                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Calculated Crime Rate</small>
+                    <div class="display-5 fw-bold text-info mb-0">
+                        {{ analysis.crime_rate_per_100k }}
+                    </div>
+                    <small class="text-muted d-block mt-2">Annual crimes per 100,000 citizens</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="report-kpi-card text-center border-top border-secondary border-3">
+                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Census Population</small>
+                    <div class="display-5 fw-bold text-dark mb-0">
+                        {{ "{:,}".format(analysis.population) }}
+                    </div>
+                    <small class="text-muted d-block mt-2">Census of India 2011 baseline</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="report-kpi-card text-center border-top border-danger border-3">
+                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Annual Avg Incidents</small>
+                    <div class="display-5 fw-bold text-danger mb-0">
+                        {{ "{:,}".format(analysis.avg_annual_crimes) }}
+                    </div>
+                    <small class="text-muted d-block mt-2">Average Total IPC cases recorded</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- National Baseline Comparative Benchmark -->
+        <div class="alert alert-light border shadow-sm p-3 mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-balance-scale fs-3 text-primary me-3"></i>
+                <div>
+                    <h6 class="fw-bold mb-0">Comparative National Safety Benchmark</h6>
+                    <div class="{{ analysis.benchmark_class }} fw-semibold small">
+                        {{ analysis.benchmark_text }} (All-India baseline: 238.3 crimes per 100,000 residents)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain Vulnerability & Safety Sub-Scores -->
+        <div class="mb-4">
+            <h5 class="fw-bold border-bottom pb-2 mb-3">
+                <i class="fas fa-shield-alt text-primary me-2"></i> Safety Domain Breakdown &amp; Sub-Scores (0–100 Scale)
+            </h5>
+            <div class="row g-3">
+                {% for domain, score in analysis.domain_scores.items() %}
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded border">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-dark">{{ domain }}</span>
+                                <span class="badge {% if score >= 75 %}bg-success{% elif score >= 55 %}bg-warning text-dark{% else %}bg-danger{% endif %} px-2 py-1 fs-6">
+                                    {{ score }} / 100
+                                </span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar {% if score >= 75 %}bg-success{% elif score >= 55 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                     role="progressbar" style="width: {{ score }}%;" aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted small mt-1">
+                                <span>Total Recorded: {{ "{:,}".format(analysis.domain_breakdown[domain]) }} cases</span>
+                                <span>{% if score >= 75 %}High Safety{% elif score >= 55 %}Moderate Safety{% else %}High Vulnerability{% endif %}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 4-Year Predictive Trajectory & Model Diagnostics -->
+        {% if prediction %}
+        <div class="mb-4">
+            <h5 class="fw-bold border-bottom pb-2 mb-3">
+                <i class="fas fa-chart-line text-primary me-2"></i> 4-Year Statistical Trend Forecast ({{ prediction['YEAR'][0] if prediction and prediction['YEAR'] else 2025 }}–{{ prediction['YEAR'][-1] if prediction and prediction['YEAR'] else 2028 }})
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle text-center mb-2">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Forecast Horizon</th>
+                            <th>Projected Total IPC Crimes</th>
+                            <th>90% Confidence Lower Bound</th>
+                            <th>90% Confidence Upper Bound</th>
+                            <th>Trajectory Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set future_years = prediction['YEAR'] %}
+                        {% set total_preds = prediction['TOTAL IPC CRIMES'] %}
+                        {% set conf = prediction.get('conf_intervals') or {} %}
+                        {% for i in range(future_years|length) %}
+                            <tr>
+                                <td class="fw-bold">{{ future_years[i] }}</td>
+                                <td class="fw-bold text-primary">{{ "{:,}".format(total_preds[i]) }}</td>
+                                <td class="text-success small">{{ "{:,}".format(conf['lower'][i]) if conf.get('lower') else 'N/A' }}</td>
+                                <td class="text-danger small">{{ "{:,}".format(conf['upper'][i]) if conf.get('upper') else 'N/A' }}</td>
+                                <td><span class="badge bg-light text-dark border">Model Verified</span></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if diagnostics %}
+            <div class="small text-muted bg-light p-2 rounded border d-flex justify-content-between flex-wrap gap-2">
+                <span>Model Engine: <strong>{{ diagnostics.better_model }}</strong> (Statistical ARIMA Time-Series)</span>
+                <span>Model Fit Accuracy: <strong>{{ diagnostics.arima.accuracy_pct }}%</strong></span>
+                <span>Root Mean Squared Error (RMSE): <strong>{{ diagnostics.arima.rmse }}</strong></span>
+                <span>Confidence Band: <strong>{{ diagnostics.confidence_level }}</strong></span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Community Safety Observations & Resident Feedback -->
+        {% if feedback %}
+        <div class="mb-4">
+            <h5 class="fw-bold border-bottom pb-2 mb-3">
+                <i class="fas fa-comments text-primary me-2"></i> Community Safety Observations
+            </h5>
+            <div class="list-group list-group-flush border rounded">
+                {% for fb in feedback %}
+                    <div class="list-group-item p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-secondary">{{ fb.category }}</span>
+                            <small class="text-muted">{{ fb.submitted_at }}</small>
+                        </div>
+                        <p class="mb-0 text-dark small">{{ fb.comment }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Official Citizen Emergency Helplines -->
+        <div class="mb-4">
+            <h5 class="fw-bold border-bottom pb-2 mb-3">
+                <i class="fas fa-phone-alt text-danger me-2"></i> Verified Citizen Emergency Directory
+            </h5>
+            <div class="row g-2 text-center">
+                <div class="col-md-3 col-6">
+                    <div class="p-2 border rounded bg-light">
+                        <div class="fw-bold text-danger fs-5">112</div>
+                        <small class="text-muted d-block">National Emergency</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-2 border rounded bg-light">
+                        <div class="fw-bold text-primary fs-5">1091 / 181</div>
+                        <small class="text-muted d-block">Women Helpline</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-2 border rounded bg-light">
+                        <div class="fw-bold text-info fs-5">1930</div>
+                        <small class="text-muted d-block">Cyber Crime Desk</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-2 border rounded bg-light">
+                        <div class="fw-bold text-success fs-5">1098</div>
+                        <small class="text-muted d-block">Childline India</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legal Disclaimer & Provenance Notice -->
+        <div class="p-3 bg-light rounded text-muted small border">
+            <strong>Data Integrity &amp; Legal Notice:</strong>
+            This dossier is generated programmatically from verified public National Crime Records Bureau (NCRB) publications (Ministry of Home Affairs, Government of India) and normalized using the Census of India 2011 population benchmarks. Information is provided for public civic awareness, academic research, and community safety evaluation purposes. This report does not constitute legal counsel or an official police clearance certificate.
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleBookmark(locationName) {
+    const btn = document.getElementById('bookmarkBtn');
+    const text = document.getElementById('bookmarkText');
+    const isSaved = btn.classList.contains('btn-warning');
+    const method = isSaved ? 'DELETE' : 'POST';
+
+    fetch('/api/bookmarks', {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location: locationName })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.saved) {
+            btn.classList.remove('btn-outline-warning');
+            btn.classList.add('btn-warning');
+            text.textContent = 'Saved';
+        } else {
+            btn.classList.remove('btn-warning');
+            btn.classList.add('btn-outline-warning');
+            text.textContent = 'Bookmark';
+        }
+    })
+    .catch(err => console.error('Error toggling bookmark:', err));
+}
+</script>
+{% endblock %}
+
